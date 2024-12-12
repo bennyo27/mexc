@@ -8,19 +8,19 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def fetch_trade_data(symbol: str, exchange: str, days: int = 2, is_futures: bool = False) -> pd.DataFrame:
+def fetch_trade_data(symbol: str, exchanges: list, days: int = 2, is_futures: bool = False) -> pd.DataFrame:
     """Fetch trade data for analysis."""
     try:
         end_time = datetime.datetime.now()
         start_time = end_time - datetime.timedelta(days=days)
         
-        logger.info(f"Fetching {symbol} trades from {exchange}...")
+        logger.info(f"Fetching {symbol} trades from {', '.join(exchanges)}...")
         df = lakeapi.load_data(
             table="trades",
             start=start_time,
             end=end_time,
             symbols=[symbol],
-            exchanges=[exchange.upper()],
+            exchanges=exchanges,
         )
         
         # Convert timestamp to datetime
@@ -163,13 +163,36 @@ def main():
     base_symbol = "BTC-USDT"
     spot_symbol, perp_symbol = get_market_symbols(base_symbol)
     
+    # List of exchanges
+    exchanges = [
+        "BINANCE",
+        # "ASCENDEX",
+        # "KUCOIN",
+        # "GATEIO",
+        # "SERUM",
+        # "COINBASE",
+        # "HUOBI",
+        # "HUOBI_SWAP",
+        # "OKX",
+        # "DYDX",
+        # "BYBIT",
+        # "COINMATE"
+    ]
+    
+    
     # Fetch and analyze spot market
-    spot_data = fetch_trade_data(spot_symbol, "BINANCE", days=2, is_futures=False)
-    analyze_market(spot_data, "SPOT", spot_symbol)
+    try:
+        spot_data = fetch_trade_data(spot_symbol, exchanges, days=2, is_futures=False)
+        analyze_market(spot_data, "SPOT", spot_symbol)
+    except Exception as e:
+        logger.error(f"Error processing spot market: {str(e)}")
     
     # Fetch and analyze PERP market
-    perp_data = fetch_trade_data(perp_symbol, "BINANCE_FUTURES", days=2, is_futures=True)
-    analyze_market(perp_data, "PERP", perp_symbol)
+    try:
+        perp_data = fetch_trade_data(perp_symbol, ["BINANCE_FUTURES"], days=2, is_futures=True)
+        analyze_market(perp_data, "PERP", perp_symbol)
+    except Exception as e:
+        logger.error(f"Error processing PERP market: {str(e)}")
 
 if __name__ == "__main__":
     main()
