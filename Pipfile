@@ -4,10 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-mexc-sdk = {file = "..\\mexc-api-sdk\\dist\\python\\mexc_sdk-1.0.0-py3-none-any.whl"}
+lakeapi = "*"
+requests = "*"
 python-dotenv = "*"
+pandas = "*"
+matplotlib = "*"
+mplfinance = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.13"
+python_version = "3.9"
